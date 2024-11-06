@@ -25,6 +25,8 @@ public class Repository {
 
     CommitService commitService;
     BranchService branchService;
+    WorkDirService workDirService;
+    StageAreaService stageAreaService;
     Head head;
     public Repository() {
         CWD = new File(System.getProperty("user.dir"));
@@ -36,8 +38,10 @@ public class Repository {
         REMOVAL_DIR = join(STAGING_AREA_DIR,"removal");
         HEAD = join(GITLET_DIR,"HEAD");
 
+        workDirService = new WorkDirService(CWD);
         commitService = new CommitService(COMMIT_DIR);
         branchService = new BranchService(BRANCH_DIR);
+        stageAreaService = new StageAreaService(ADDITION_DIR,REMOVAL_DIR);
         head = new Head(HEAD);
     }
 
@@ -67,11 +71,39 @@ public class Repository {
 
         // create master branch
         Branch masterBranch = new Branch("master", initCommit.getCommitId());
-        System.out.println(masterBranch);
         branchService.saveBranch(masterBranch);
 
         // Create Head pointer
         head.setHead(masterBranch);
+    }
+
+    /**
+     * add [file name]
+     * add a copy of files at it currently exist to addition staging ares
+     * .gitlet dir must be before exist to run this command
+     * if the file not exist print 'File does not exist.'
+     * if the current file is the same file in current commit. not added it and remove it form staging area
+     * if not the same overwrite file that exist in staging area
+     * @param fileName
+     */
+    public void add(String fileName) {
+        checkGitletDir();
+        if (!workDirService.fileExist(fileName)) {
+            systemExist("File does not exist.");
+        }
+
+        String curFile = workDirService.getHashedFile(fileName);
+        Commit currentCommit = getCurrentCommit();
+        String currentCommitFile = currentCommit.getTrackedBlobs().getOrDefault(fileName,null);
+        if (currentCommitFile == null || !currentCommitFile.equals(curFile)) {
+            stageAreaService.addInAddition(fileName,curFile);
+        } else {
+            stageAreaService.deleteFromAddition(fileName);
+        }
+
+        // if this file staged for remove before, delete it
+        stageAreaService.deleteFromRemoval(fileName);
+
     }
 
     /**
@@ -87,6 +119,18 @@ public class Repository {
         System.out.println("commit " + commit.getCommitId());
         System.out.println("Date: " + commit.getTimestamp());
         System.out.println(commit.getMessage());
+    }
 
+    private void checkGitletDir() {
+        if (!GITLET_DIR.exists()) {
+            systemExist("Not in an initialized Gitlet directory.");
+        }
+    }
+
+    private Branch getCurrentBranch() {
+        return branchService.getBranch(head.getHead());
+    }
+    private Commit getCurrentCommit() {
+        return commitService.getCommitBySha1(getCurrentBranch().getCommitId());
     }
 }

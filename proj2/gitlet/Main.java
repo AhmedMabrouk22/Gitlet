@@ -1,5 +1,6 @@
 package gitlet;
 
+import static gitlet.Utils.checkNumArgs;
 import static gitlet.Utils.systemExist;
 
 /** Driver class for Gitlet, a subset of the Git version-control system.
@@ -22,14 +23,19 @@ public class Main {
         try {
             switch(firstArg) {
                 case "init":
+                    checkNumArgs(args,0);
                     repo.init();
                     break;
                 case "add":
-                    // TODO: handle the `add [filename]` command
+                    checkNumArgs(args,1);
+                    repo.add(args[1]);
                     break;
                 case "log":
+                    checkNumArgs(args,0);
                     repo.log();
                     break;
+                default:
+                    systemExist("No command with that name exists.");
             }
         } catch (Exception ex) {
             ex.printStackTrace();

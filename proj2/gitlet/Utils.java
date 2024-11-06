@@ -241,4 +241,10 @@ class Utils {
         System.out.println(message);
         System.exit(0);
     }
+
+    static void checkNumArgs(String[] args, int requiredNum) {
+        if (args.length - 1 != requiredNum) {
+            systemExist("Incorrect operands.");
+        }
+    }
 }
