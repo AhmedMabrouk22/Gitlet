@@ -2,8 +2,6 @@ package gitlet;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -87,7 +85,7 @@ public class Repository {
 
         System.out.println("===");
         System.out.println("commit " + commit.getCommitId());
-        System.out.println("Date: " + ZonedDateTime.from(commit.getTimestamp()));
+        System.out.println("Date: " + commit.getTimestamp());
         System.out.println(commit.getMessage());
 
     }
