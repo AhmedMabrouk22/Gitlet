@@ -1,26 +1,78 @@
 package gitlet;
 
-// TODO: any imports you need here
+import java.io.File;
+import java.io.Serializable;
+import java.util.*;
 
-import java.util.Date; // TODO: You'll likely use this in this class
+import static gitlet.Utils.join;
+import static gitlet.Utils.sha1;
 
 /** Represents a gitlet commit object.
- *  TODO: It's a good idea to give a description here of what else this Class
- *  does at a high level.
- *
- *  @author TODO
+ *  @author Ahmed Mabrouk
  */
-public class Commit {
-    /**
-     * TODO: add instance variables here.
-     *
-     * List all instance variables of the Commit class here with a useful
-     * comment above them describing what that variable represents and how that
-     * variable is used. We've provided one example for `message`.
-     */
+public class Commit implements Serializable {
 
-    /** The message of this Commit. */
+    /** commit hash */
+    private String commitId;
+    private String parent;
+    private Date timestamp;
     private String message;
+    private Map<String,String> trackedBlobs;
+    public Commit(String message, Date timestamp, String parent, Map<String,String> trackedBlobs) {
+        this.message = message;
+        this.timestamp = timestamp != null ? timestamp : new Date();
+        this.parent = parent;
+        this.trackedBlobs = trackedBlobs != null ? trackedBlobs :new HashMap<>();
+        this.commitId = generateHash();
+    }
 
-    /* TODO: fill in the rest of this class. */
+    private String generateHash() {
+        List<Object> items = new ArrayList<>();
+        items.add(message);
+        items.add(timestamp.toString());
+        items.add(parent);
+        for (Map.Entry<String,String> blob : trackedBlobs.entrySet())
+            items.add(blob.toString());
+        return sha1(items);
+    }
+
+    public String getCommitId() {
+        return commitId;
+    }
+
+    public void setCommitId(String commitId) {
+        this.commitId = commitId;
+    }
+
+    public String getParent() {
+        return parent;
+    }
+
+    public void setParent(String parent) {
+        this.parent = parent;
+    }
+
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public Map<String, String> getTrackedBlobs() {
+        return trackedBlobs;
+    }
+
+    public void setTrackedBlobs(Map<String, String> trackedBlobs) {
+        this.trackedBlobs = trackedBlobs;
+    }
 }

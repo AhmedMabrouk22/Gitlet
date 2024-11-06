@@ -236,4 +236,9 @@ class Utils {
         System.out.printf(msg, args);
         System.out.println();
     }
+
+    static void systemExist(String message) {
+        System.out.println(message);
+        System.exit(0);
+    }
 }
