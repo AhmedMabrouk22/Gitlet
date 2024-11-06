@@ -20,4 +20,14 @@ public class BranchService {
         File branchFile = join(BRANCH_DIR,branch.getBranchName());
         writeObject(branchFile,branch);
     }
+
+    /**
+     * Read branch file and return branch object
+     * @param branchName
+     * @return
+     */
+    public Branch getBranch(String branchName) {
+        File branchFile = join(BRANCH_DIR,branchName);
+        return Utils.readObject(branchFile, Branch.class);
+    }
 }

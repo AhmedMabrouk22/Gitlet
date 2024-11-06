@@ -27,9 +27,12 @@ public class Main {
                 case "add":
                     // TODO: handle the `add [filename]` command
                     break;
-                // TODO: FILL THE REST IN
+                case "log":
+                    repo.log();
+                    break;
             }
         } catch (Exception ex) {
+            ex.printStackTrace();
             systemExist(ex.getMessage());
         }
     }

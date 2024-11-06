@@ -28,4 +28,12 @@ public class Branch implements Serializable {
     public void setCommitId(String commitId) {
         this.commitId = commitId;
     }
+
+    @Override
+    public String toString() {
+        return "Branch{" +
+                "branchName='" + branchName + '\'' +
+                ", commitId='" + commitId + '\'' +
+                '}';
+    }
 }

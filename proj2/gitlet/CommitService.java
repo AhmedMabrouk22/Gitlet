@@ -2,8 +2,7 @@ package gitlet;
 
 import java.io.File;
 
-import static gitlet.Utils.join;
-import static gitlet.Utils.writeObject;
+import static gitlet.Utils.*;
 
 public class CommitService {
     private final File COMMIT_DIR;
@@ -20,4 +19,10 @@ public class CommitService {
         File commitFile = join(COMMIT_DIR,commit.getCommitId());
         writeObject(commitFile,commit);
     }
+
+    public Commit getCommitBySha1(String commitSha1) {
+        File commitFile = join(COMMIT_DIR,commitSha1);
+        return readObject(commitFile,Commit.class);
+    }
+
 }
