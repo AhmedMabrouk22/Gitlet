@@ -22,4 +22,9 @@ public class WorkDirService {
         return sha1(readContentsAsString(getFile(fileName)));
     }
 
+    public void deleteFile(String fileName) {
+        File file = getFile(fileName);
+        if (file != null) file.delete();
+    }
+
 }

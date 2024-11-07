@@ -17,6 +17,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Formatter;
 import java.util.List;
+import java.util.Objects;
 
 
 /** Assorted utilities.
@@ -243,6 +244,9 @@ class Utils {
     }
 
     static void checkNumArgs(String[] args, int requiredNum) {
+        if (args[0].equals("commit") && args.length < 2) {
+            systemExist("Please enter a commit message.");
+        }
         if (args.length - 1 != requiredNum) {
             systemExist("Incorrect operands.");
         }

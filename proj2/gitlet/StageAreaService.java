@@ -1,6 +1,8 @@
 package gitlet;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 import static gitlet.Utils.join;
 import static gitlet.Utils.writeContents;
@@ -12,6 +14,14 @@ public class StageAreaService {
     public StageAreaService(File addDir, File removeDir) {
         ADD_DIR = addDir;
         REMOVE_DIR = removeDir;
+    }
+
+    public List<String> getAdditionFilesNames() {
+        return Utils.plainFilenamesIn(ADD_DIR);
+    }
+
+    public List<String> getRemovalFilesNames() {
+        return Utils.plainFilenamesIn(REMOVE_DIR);
     }
 
     public void addInAddition(String fileName, String content) {
@@ -39,8 +49,8 @@ public class StageAreaService {
         return file.exists() ? file : null;
     }
 
-    public void addInRemoval(String fileName, String content) {
-        writeContents(join(REMOVE_DIR,fileName),content);
+    public void addInRemoval(String fileName) throws IOException {
+        join(REMOVE_DIR,fileName).createNewFile();
     }
 
     public void deleteFromRemoval(String fileName) {
@@ -48,6 +58,12 @@ public class StageAreaService {
         if (file != null) file.delete();
     }
 
+    public void clear() {
+        List<String> additionFiles = getAdditionFilesNames();
+        List<String> removalFiles = getRemovalFilesNames();
+        additionFiles.forEach(this::deleteFromAddition);
+        removalFiles.forEach(this::deleteFromRemoval);
+    }
 
 
 }

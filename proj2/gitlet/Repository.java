@@ -1,10 +1,14 @@
 package gitlet;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 import static gitlet.Utils.*;
@@ -21,12 +25,14 @@ public class Repository {
     private final File STAGING_AREA_DIR;
     private final File ADDITION_DIR;
     private final File REMOVAL_DIR;
+    private final File BLOB_DIR;
     private final File HEAD;
 
     CommitService commitService;
     BranchService branchService;
     WorkDirService workDirService;
     StageAreaService stageAreaService;
+    BlobService blobService;
     Head head;
     public Repository() {
         CWD = new File(System.getProperty("user.dir"));
@@ -36,12 +42,14 @@ public class Repository {
         STAGING_AREA_DIR = join(GITLET_DIR,"staging_area");
         ADDITION_DIR = join(STAGING_AREA_DIR,"addition");
         REMOVAL_DIR = join(STAGING_AREA_DIR,"removal");
+        BLOB_DIR = join(GITLET_DIR,"blobs");
         HEAD = join(GITLET_DIR,"HEAD");
 
         workDirService = new WorkDirService(CWD);
         commitService = new CommitService(COMMIT_DIR);
         branchService = new BranchService(BRANCH_DIR);
         stageAreaService = new StageAreaService(ADDITION_DIR,REMOVAL_DIR);
+        blobService = new BlobService(BLOB_DIR);
         head = new Head(HEAD);
     }
 
@@ -63,6 +71,7 @@ public class Repository {
         STAGING_AREA_DIR.mkdir();
         ADDITION_DIR.mkdir();
         REMOVAL_DIR.mkdir();
+        BLOB_DIR.mkdir();
         HEAD.createNewFile();
 
         // create first commit
@@ -88,7 +97,7 @@ public class Repository {
      */
     public void add(String fileName) {
         checkGitletDir();
-        CheckFileExist(fileName);
+        checkFileExist(fileName);
         String curFile = workDirService.getHashedFile(fileName);
         Commit currentCommit = getCurrentCommit();
         String currentCommitFile = currentCommit.getTrackedBlobs().getOrDefault(fileName,null);
@@ -109,9 +118,9 @@ public class Repository {
      * if the file is tracked in the current commit remove it
      * @param fileName
      */
-    public void rm(String fileName) {
+    public void rm(String fileName) throws IOException {
         checkGitletDir();
-        CheckFileExist(fileName);
+        checkFileExist(fileName);
         File file = stageAreaService.getFileFromAddition(fileName);
         Commit curCommit = getCurrentCommit();
         String curCommitFile = curCommit.getTrackedBlobs().getOrDefault(fileName,null);
@@ -121,10 +130,53 @@ public class Repository {
             stageAreaService.deleteFromAddition(file);
         }
 
-        // TODO: delete file from current commit
-//        if (curCommitFile != null) {
-//
-//        }
+        if (curCommitFile != null) {
+            // add it in removal and remove it form working dir
+            stageAreaService.addInRemoval(fileName);
+            workDirService.deleteFile(fileName);
+        }
+    }
+
+    /**
+     * commit [message]
+     * create new commit tracked files in the current commit and staging area
+     * a commit will only update the contents of files it is tracking that have been stage for addition
+     * The staging area is cleared after a commit
+     *
+     * @param message
+     */
+    public void commit(String message) {
+        checkGitletDir();
+        List<String> additionFiles = stageAreaService.getAdditionFilesNames();
+        List<String> removalFiles = stageAreaService.getRemovalFilesNames();
+
+        if (additionFiles.isEmpty() && removalFiles.isEmpty()) {
+            systemExist("No changes added to the commit.");
+        }
+
+        Commit currentCommit = getCurrentCommit();
+        Map<String,String> blobs = new HashMap<>(currentCommit.getTrackedBlobs());
+
+        // create blob for each file in addition area and store it in blob file
+        additionFiles.forEach(fileName -> {
+            File file = stageAreaService.getFileFromAddition(fileName);
+            String blobId = blobService.saveBlob(file);
+            blobs.put(fileName,blobId);
+        });
+
+        // remove file that staged in removal
+        removalFiles.forEach(blobs::remove);
+
+        stageAreaService.clear();
+
+        // create new commit
+        Commit newCommit = new Commit(message, Date.from(Instant.now()), currentCommit.getCommitId(),blobs);
+        commitService.saveCommit(newCommit);
+
+        // change current commit
+        Branch branch = getCurrentBranch();
+        branch.setCommitId(newCommit.getCommitId());
+        branchService.saveBranch(branch);
     }
 
     /**
@@ -140,6 +192,8 @@ public class Repository {
         System.out.println("commit " + commit.getCommitId());
         System.out.println("Date: " + commit.getTimestamp());
         System.out.println(commit.getMessage());
+        System.out.println("Blobs");
+        commit.getTrackedBlobs().entrySet().forEach(enrty -> System.out.println(enrty.toString()));
     }
 
     private void checkGitletDir() {
@@ -155,7 +209,7 @@ public class Repository {
         return commitService.getCommitBySha1(getCurrentBranch().getCommitId());
     }
 
-    private void CheckFileExist(String fileName) {
+    private void checkFileExist(String fileName) {
         if (!workDirService.fileExist(fileName)) {
             systemExist("File does not exist.");
         }
