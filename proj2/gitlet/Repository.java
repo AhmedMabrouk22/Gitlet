@@ -121,7 +121,7 @@ public class Repository {
      * if the file is tracked in the current commit remove it
      * @param fileName
      */
-    public void rm(String fileName) throws IOException {
+    public void rm(String fileName) {
         checkGitletDir();
         checkFileExist(fileName);
         File file = stageAreaService.getFileFromAddition(fileName);
@@ -135,7 +135,8 @@ public class Repository {
 
         if (curCommitFile != null) {
             // add it in removal and remove it form working dir
-            stageAreaService.addInRemoval(fileName);
+            file = workDirService.getFile(fileName);
+            stageAreaService.addInRemoval(file);
             workDirService.deleteFile(fileName);
         }
     }

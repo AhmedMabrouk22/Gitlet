@@ -48,8 +48,8 @@ public class StageAreaService {
         return file.exists() ? file : null;
     }
 
-    public void addInRemoval(String fileName) throws IOException {
-        join(REMOVE_DIR,fileName).createNewFile();
+    public void addInRemoval(File file){
+        writeContents(join(REMOVE_DIR,file.getName()), readContentsAsString(file));
     }
 
     public void deleteFromRemoval(String fileName) {
