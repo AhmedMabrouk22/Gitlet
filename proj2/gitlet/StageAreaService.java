@@ -4,8 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import static gitlet.Utils.join;
-import static gitlet.Utils.writeContents;
+import static gitlet.Utils.*;
 
 public class StageAreaService {
     private final File ADD_DIR;
@@ -24,8 +23,8 @@ public class StageAreaService {
         return Utils.plainFilenamesIn(REMOVE_DIR);
     }
 
-    public void addInAddition(String fileName, String content) {
-        writeContents(join(ADD_DIR,fileName),content);
+    public void addInAddition(File file) {
+        writeContents(join(ADD_DIR,file.getName()),readContentsAsString(file));
     }
 
     public File getFileFromAddition(String fileName) {

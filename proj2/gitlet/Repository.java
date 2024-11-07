@@ -98,11 +98,14 @@ public class Repository {
     public void add(String fileName) {
         checkGitletDir();
         checkFileExist(fileName);
-        String curFile = workDirService.getHashedFile(fileName);
+
+        File curFile = workDirService.getFile(fileName);
+        String hashedFile = workDirService.getHashedFile(fileName);
+
         Commit currentCommit = getCurrentCommit();
         String currentCommitFile = currentCommit.getTrackedBlobs().getOrDefault(fileName,null);
-        if (currentCommitFile == null || !currentCommitFile.equals(curFile)) {
-            stageAreaService.addInAddition(fileName,curFile);
+        if (currentCommitFile == null || !currentCommitFile.equals(hashedFile)) {
+            stageAreaService.addInAddition(curFile);
         } else {
             stageAreaService.deleteFromAddition(fileName);
         }
@@ -192,8 +195,6 @@ public class Repository {
         System.out.println("commit " + commit.getCommitId());
         System.out.println("Date: " + commit.getTimestamp());
         System.out.println(commit.getMessage());
-        System.out.println("Blobs");
-        commit.getTrackedBlobs().entrySet().forEach(enrty -> System.out.println(enrty.toString()));
     }
 
     private void checkGitletDir() {
