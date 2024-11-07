@@ -26,8 +26,12 @@ public class StageAreaService {
     public void deleteFromAddition(String fileName) {
         File file = getFileFromAddition(fileName);
         if (file != null) {
-            file.delete();
+            deleteFromAddition(file);
         }
+    }
+
+    public void deleteFromAddition(File file) {
+        file.delete();
     }
 
     public File getFileFromRemoval(String fileName) {

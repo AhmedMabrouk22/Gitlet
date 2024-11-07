@@ -30,6 +30,10 @@ public class Main {
                     checkNumArgs(args,1);
                     repo.add(args[1]);
                     break;
+                case "rm":
+                    checkNumArgs(args,1);
+                    repo.rm(args[1]);
+                    break;
                 case "log":
                     checkNumArgs(args,0);
                     repo.log();

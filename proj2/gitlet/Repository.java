@@ -88,10 +88,7 @@ public class Repository {
      */
     public void add(String fileName) {
         checkGitletDir();
-        if (!workDirService.fileExist(fileName)) {
-            systemExist("File does not exist.");
-        }
-
+        CheckFileExist(fileName);
         String curFile = workDirService.getHashedFile(fileName);
         Commit currentCommit = getCurrentCommit();
         String currentCommitFile = currentCommit.getTrackedBlobs().getOrDefault(fileName,null);
@@ -104,6 +101,30 @@ public class Repository {
         // if this file staged for remove before, delete it
         stageAreaService.deleteFromRemoval(fileName);
 
+    }
+
+    /**
+     * rm [file name]
+     * unstage file if it is currently staged for addition
+     * if the file is tracked in the current commit remove it
+     * @param fileName
+     */
+    public void rm(String fileName) {
+        checkGitletDir();
+        CheckFileExist(fileName);
+        File file = stageAreaService.getFileFromAddition(fileName);
+        Commit curCommit = getCurrentCommit();
+        String curCommitFile = curCommit.getTrackedBlobs().getOrDefault(fileName,null);
+        if (file == null && curCommitFile == null) systemExist("No reason to remove the file.");
+
+        if (file != null) {
+            stageAreaService.deleteFromAddition(file);
+        }
+
+        // TODO: delete file from current commit
+//        if (curCommitFile != null) {
+//
+//        }
     }
 
     /**
@@ -132,5 +153,11 @@ public class Repository {
     }
     private Commit getCurrentCommit() {
         return commitService.getCommitBySha1(getCurrentBranch().getCommitId());
+    }
+
+    private void CheckFileExist(String fileName) {
+        if (!workDirService.fileExist(fileName)) {
+            systemExist("File does not exist.");
+        }
     }
 }
