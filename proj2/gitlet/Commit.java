@@ -75,4 +75,12 @@ public class Commit implements Serializable {
     public void setTrackedBlobs(Map<String, String> trackedBlobs) {
         this.trackedBlobs = trackedBlobs;
     }
+
+    public String log() {
+        return "===\n" +
+                String.format("commit %s\n", this.getCommitId()) +
+                new Formatter()
+                        .format("Date: %1$ta %1$tb %1td %1$tT %1$tY %1$tz\n", this.getTimestamp()) +
+                String.format("%s\n\n", this.getMessage());
+    }
 }

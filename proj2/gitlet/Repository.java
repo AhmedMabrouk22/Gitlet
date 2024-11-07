@@ -6,10 +6,8 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 import static gitlet.Utils.*;
 
@@ -188,14 +186,11 @@ public class Repository {
      * it start from current head commit
      */
     public void log() {
-        String branchName = head.getHead();
-        Branch branch = branchService.getBranch(branchName);
-        Commit commit = commitService.getCommitBySha1(branch.getCommitId());
-
-        System.out.println("===");
-        System.out.println("commit " + commit.getCommitId());
-        System.out.println("Date: " + commit.getTimestamp());
-        System.out.println(commit.getMessage());
+        checkGitletDir();
+        getCommits(getCurrentCommit())
+                .stream()
+                .map(Commit::log)
+                .forEach(System.out::print);
     }
 
     private void checkGitletDir() {
@@ -215,5 +210,18 @@ public class Repository {
         if (!workDirService.fileExist(fileName)) {
             systemExist("File does not exist.");
         }
+    }
+
+    private List<Commit> getCommits(Commit commit) {
+        List<Commit> res = new ArrayList<>();
+        Commit cur = commit;
+        while (cur != null) {
+            res.add(cur);
+            String parentSha1 = cur.getParent();
+            if (!parentSha1.isEmpty())
+                cur = commitService.getCommitBySha1(parentSha1);
+            else cur = null;
+        }
+        return res;
     }
 }
