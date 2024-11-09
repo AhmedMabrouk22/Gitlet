@@ -26,12 +26,12 @@ public class Repository {
     private final File BLOB_DIR;
     private final File HEAD;
 
-    CommitService commitService;
-    BranchService branchService;
-    WorkDirService workDirService;
-    StageAreaService stageAreaService;
-    BlobService blobService;
-    Head head;
+    private final CommitService commitService;
+    private final BranchService branchService;
+    private final WorkDirService workDirService;
+    private final StageAreaService stageAreaService;
+    private final BlobService blobService;
+    private final Head head;
     public Repository() {
         CWD = new File(System.getProperty("user.dir"));
         GITLET_DIR = join(CWD, ".gitlet");
@@ -191,6 +191,22 @@ public class Repository {
                 .stream()
                 .map(Commit::log)
                 .forEach(System.out::print);
+    }
+
+    /**
+     * branch [branch name]
+     * Creates a new branch with the given name
+     * Points it at the current head commit
+     * This command does NOT immediately switch to the newly created branch
+     * If a branch with the given name already exists, print the error message "A branch with that name already exists."
+     */
+    public void branch(String branchName) {
+        checkGitletDir();
+        if (branchService.isExist(branchName)) {
+            systemExist("A branch with that name already exists.");
+        }
+        Branch branch = new Branch(branchName, getCurrentCommit().getCommitId());
+        branchService.saveBranch(branch);
     }
 
     private void checkGitletDir() {

@@ -30,4 +30,9 @@ public class BranchService {
         File branchFile = join(BRANCH_DIR,branchName);
         return Utils.readObject(branchFile, Branch.class);
     }
+
+    public boolean isExist(String branchName) {
+        return Utils.plainFilenamesIn(BRANCH_DIR).stream()
+                .anyMatch(file -> file.equals(branchName));
+    }
 }
