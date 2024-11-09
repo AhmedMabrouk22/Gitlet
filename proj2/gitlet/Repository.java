@@ -199,6 +199,8 @@ public class Repository {
      * Points it at the current head commit
      * This command does NOT immediately switch to the newly created branch
      * If a branch with the given name already exists, print the error message "A branch with that name already exists."
+     *
+     * @param branchName
      */
     public void branch(String branchName) {
         checkGitletDir();
@@ -207,6 +209,23 @@ public class Repository {
         }
         Branch branch = new Branch(branchName, getCurrentCommit().getCommitId());
         branchService.saveBranch(branch);
+    }
+
+    /**
+     * Displays what branches currently exist and marks the current branch with a *
+     * displays what files have been staged for addition or removal
+     * Entries listed in lexicographic order
+     *
+     */
+    public void status() {
+        checkGitletDir();
+        String logBuilder = String.format("%s\n", branchService.log(getCurrentBranch().getBranchName())) +
+                String.format("%s\n", stageAreaService.logAddition()) +
+                String.format("%s\n", stageAreaService.logRemoval()) +
+                "=== Modifications Not Staged For Commit ===\n\n" + // TODO
+                "=== Untracked Files ===\n\n"; // TODO
+
+        System.out.println(logBuilder);
     }
 
     private void checkGitletDir() {

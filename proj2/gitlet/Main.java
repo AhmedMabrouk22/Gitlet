@@ -45,6 +45,10 @@ public class Main {
                     checkNumArgs(args,1);
                     repo.branch(args[1]);
                     break;
+                case "status":
+                    checkNumArgs(args,0);
+                    repo.status();
+                    break;
                 default:
                     systemExist("No command with that name exists.");
             }

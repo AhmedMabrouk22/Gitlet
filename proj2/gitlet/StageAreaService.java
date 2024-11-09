@@ -1,7 +1,6 @@
 package gitlet;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 import static gitlet.Utils.*;
@@ -64,5 +63,22 @@ public class StageAreaService {
         removalFiles.forEach(this::deleteFromRemoval);
     }
 
+    public String logAddition() {
+        List<String> addition = getAdditionFilesNames();
+        addition.sort(null);
+        StringBuilder logBuilder = new StringBuilder();
+        logBuilder.append("=== Staged Files ===\n");
+        addition.forEach(file -> logBuilder.append(String.format("%s\n",file)));
+        return logBuilder.toString();
+    }
+
+    public String logRemoval() {
+        List<String> removal = getRemovalFilesNames();
+        removal.sort(null);
+        StringBuilder logBuilder = new StringBuilder();
+        logBuilder.append("=== Removed Files ===\n");
+        removal.forEach(file -> logBuilder.append(String.format("%s\n",file)));
+        return logBuilder.toString();
+    }
 
 }

@@ -1,9 +1,9 @@
 package gitlet;
 
 import java.io.File;
+import java.util.List;
 
-import static gitlet.Utils.join;
-import static gitlet.Utils.writeObject;
+import static gitlet.Utils.*;
 
 public class BranchService {
     private final File BRANCH_DIR;
@@ -32,7 +32,24 @@ public class BranchService {
     }
 
     public boolean isExist(String branchName) {
-        return Utils.plainFilenamesIn(BRANCH_DIR).stream()
+        return getBranches().stream()
                 .anyMatch(file -> file.equals(branchName));
+    }
+    public List<String> getBranches() {
+        return plainFilenamesIn(BRANCH_DIR);
+    }
+
+    public String log(String curBranchName) {
+        StringBuilder logBuilder = new StringBuilder();
+        logBuilder.append("=== Branches ===\n");
+        List<String> branches = getBranches();
+        branches.sort(null);
+        branches.forEach(branch -> {
+            if (branch.equals(curBranchName))
+                logBuilder.append(String.format("*%s\n",branch));
+            else
+                logBuilder.append(String.format("%s\n",branch));
+        });
+        return logBuilder.toString();
     }
 }
