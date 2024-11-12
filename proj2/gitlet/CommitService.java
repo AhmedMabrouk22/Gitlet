@@ -1,6 +1,10 @@
 package gitlet;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static gitlet.Utils.*;
 
@@ -25,5 +29,11 @@ public class CommitService {
         return readObject(commitFile,Commit.class);
     }
 
-
+    public List<Commit> getAllCommits() {
+        List<String> commits = Objects.requireNonNull(plainFilenamesIn(COMMIT_DIR));
+        return commits
+                .stream()
+                .map(this::getCommitBySha1)
+                .collect(Collectors.toList());
+    }
 }

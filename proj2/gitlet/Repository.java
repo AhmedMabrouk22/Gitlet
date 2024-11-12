@@ -194,6 +194,18 @@ public class Repository {
     }
 
     /**
+     *  Like log, except displays information about all commits ever made.
+     *  The order of the commits does not matter
+     */
+    public void globalLog() {
+        checkGitletDir();
+        commitService.getAllCommits()
+                .stream()
+                .map(Commit::log)
+                .forEach(System.out::print);
+    }
+
+    /**
      * branch [branch name]
      * Creates a new branch with the given name
      * Points it at the current head commit
