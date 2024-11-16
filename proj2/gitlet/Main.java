@@ -45,6 +45,10 @@ public class Main {
                     checkNumArgs(args,0);
                     repo.globalLog();
                     break;
+                case "find":
+                    checkNumArgs(args,1);
+                    repo.find(args[1]);
+                    break;
                 case "branch":
                     checkNumArgs(args,1);
                     repo.branch(args[1]);

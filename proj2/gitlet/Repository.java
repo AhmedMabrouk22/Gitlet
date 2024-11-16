@@ -206,6 +206,19 @@ public class Repository {
     }
 
     /**
+     * Print ids of all commits that have the commit message
+     * @param commitMessage
+     */
+    public void find(String commitMessage) {
+        checkGitletDir();
+        List<Commit> commits = commitService.getAllCommitsByMessage(commitMessage);
+        if (commits.isEmpty()) {
+            systemExist("Found no commit with that message.");
+        }
+        commits.forEach(commit -> System.out.println(commit.getCommitId()));
+    }
+
+    /**
      * branch [branch name]
      * Creates a new branch with the given name
      * Points it at the current head commit

@@ -36,4 +36,11 @@ public class CommitService {
                 .map(this::getCommitBySha1)
                 .collect(Collectors.toList());
     }
+
+    public List<Commit> getAllCommitsByMessage(String commitMessage) {
+        return getAllCommits()
+                .stream()
+                .filter(commit -> commit.getMessage().equals(commitMessage))
+                .collect(Collectors.toList());
+    }
 }
