@@ -53,4 +53,10 @@ public class BranchService {
         });
         return logBuilder.toString();
     }
+
+    public void deleteBranch(String branchName) {
+        File file = join(BRANCH_DIR,branchName);
+        if (file.exists())
+            file.delete();
+    }
 }

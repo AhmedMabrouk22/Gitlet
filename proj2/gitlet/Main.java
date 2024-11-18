@@ -76,6 +76,10 @@ public class Main {
                     checkNumArgs(args,1);
                     repo.branch(args[1]);
                     break;
+                case "rm-branch":
+                    checkNumArgs(args,1);
+                    repo.rmBranch(args[1]);
+                    break;
                 case "status":
                     checkNumArgs(args,0);
                     repo.status();

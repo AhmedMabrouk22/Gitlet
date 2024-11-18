@@ -296,6 +296,26 @@ public class Repository {
     }
 
     /**
+     * rm-branch [branch name]
+     * delete the branch with the given name
+     * if a branch not exist print "A branch with that name does not exist."
+     * if you try to remove the current branch print "Cannot remove the current branch."
+     * @param branchName
+     */
+    public void rmBranch(String branchName) {
+        checkGitletDir();
+        Branch branch = branchService.getBranch(branchName);
+        if (branch == null) {
+            systemExit("A branch with that name does not exist.");
+        }
+        if (getCurrentBranch().getBranchName().equals(branchName)) {
+            systemExit("Cannot remove the current branch.");
+        }
+
+        branchService.deleteBranch(branchName);
+    }
+
+    /**
      * Displays what branches currently exist and marks the current branch with a *
      * displays what files have been staged for addition or removal
      * Entries listed in lexicographic order
