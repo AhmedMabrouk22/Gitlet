@@ -332,6 +332,27 @@ public class Repository {
         System.out.println(logBuilder);
     }
 
+    /**
+     *  Checks out all the files tracked by the given commit
+     *  Removes tracked files that are not present in that commit
+     *  Moves the current branch’s head to that commit node
+     *  The staging area is cleared.
+     *  If a working file is untracked in the current branch and would be overwritten print "There is an untracked file in the way; delete it, or add and commit it first."
+     * @param commitID
+     */
+    public void reset(String commitID) {
+        checkGitletDir();
+        Commit commit = commitService.getCommitBySha1(commitID);
+        if (commit == null) {
+            systemExit("No commit with that id exists.");
+        }
+
+        checkoutCommit(commit);
+        Branch branch = getCurrentBranch();
+        branch.setCommitId(commitID);
+        branchService.saveBranch(branch);
+    }
+
     private void checkGitletDir() {
         if (!GITLET_DIR.exists()) {
             systemExit("Not in an initialized Gitlet directory.");
@@ -370,7 +391,7 @@ public class Repository {
 
         // check if this file exist in the current commit or not
         // if exist check is tracked or untracked
-        // if untracked and the file exist in the target branch print error message and exit
+        // if untracked and the file exist in the target branch/commit print error message and exit
         if (workDirFiles.stream()
                 .map(File::getName)
                 .filter(fileName ->

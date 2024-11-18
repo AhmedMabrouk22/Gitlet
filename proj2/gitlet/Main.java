@@ -84,6 +84,10 @@ public class Main {
                     checkNumArgs(args,0);
                     repo.status();
                     break;
+                case "reset":
+                    checkNumArgs(args,1);
+                    repo.reset(args[1]);
+                    break;
                 default:
                     systemExit("No command with that name exists.");
             }
