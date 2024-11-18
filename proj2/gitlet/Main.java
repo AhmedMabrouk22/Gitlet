@@ -49,6 +49,29 @@ public class Main {
                     checkNumArgs(args,1);
                     repo.find(args[1]);
                     break;
+                case "checkout":
+                    switch (args.length) {
+                        case 2:
+                            checkNumArgs(args,1);
+                            repo.checkoutBranch(args[1]);
+                            break;
+                        case 3:
+                            if (!args[1].equals("--"))
+                                systemExist("Incorrect operands.");
+                            checkNumArgs(args,2);
+                            repo.checkout(args[2]);
+                            break;
+                        case 4:
+                            if (!args[2].equals("--"))
+                                systemExist("Incorrect operands.");
+                            checkNumArgs(args,3);
+                            repo.checkout(args[1],args[3]);
+                            break;
+                        default:
+                            systemExist("Incorrect operands.");
+                            break;
+                    }
+                    break;
                 case "branch":
                     checkNumArgs(args,1);
                     repo.branch(args[1]);

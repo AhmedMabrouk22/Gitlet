@@ -28,6 +28,7 @@ public class BranchService {
      */
     public Branch getBranch(String branchName) {
         File branchFile = join(BRANCH_DIR,branchName);
+        if (!branchFile.exists()) return null;
         return Utils.readObject(branchFile, Branch.class);
     }
 

@@ -18,4 +18,9 @@ public class BlobService {
         writeContents(blob,blobContent);
         return blobId;
     }
+
+    public File getBlob(String blobName) {
+        return join(BLOB_DIR,blobName);
+    }
+
 }

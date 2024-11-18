@@ -1,6 +1,9 @@
 package gitlet;
 
 import java.io.File;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static gitlet.Utils.*;
 
@@ -25,6 +28,24 @@ public class WorkDirService {
     public void deleteFile(String fileName) {
         File file = getFile(fileName);
         if (file != null) file.delete();
+    }
+
+    public void addFile(String content, String fileName) {
+        File file = join(WORK_DIR,fileName);
+        writeContents(file,content);
+    }
+
+    public List<File> getAllFiles() {
+        return Objects.requireNonNull(plainFilenamesIn(WORK_DIR))
+                .stream()
+                .map(fileName -> join(WORK_DIR,fileName))
+                .collect(Collectors.toList());
+    }
+
+    public void clear() {
+        getAllFiles().stream()
+                .map(File::getName)
+                .forEach(this::deleteFile);
     }
 
 }

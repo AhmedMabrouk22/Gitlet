@@ -219,6 +219,68 @@ public class Repository {
     }
 
     /**
+     * checkout -- [file name]
+     * Takes the version of the file as it exists in the head commit and puts it in the working directory
+     * overwriting the version of the file that’s already there if there is one
+     * The new version of the file is not staged.
+     * @param fileName
+     */
+    public void checkout(String fileName) {
+        checkGitletDir();
+        String currentCommit = getCurrentCommit().getCommitId();
+        checkout(currentCommit,fileName);
+    }
+
+    /**
+     * checkout [commit hash] -- [file name]
+     * Takes the version of the file as it exists in the commit with the given id and  puts it in the working directory
+     * overwriting the version of the file that’s already there if there is one
+     * the new version of the file is not staged.
+     * @param commitHash
+     * @param fileName
+     */
+    public void checkout(String commitHash, String fileName) {
+        checkGitletDir();
+        Commit commit = commitService.getCommitBySha1(commitHash);
+        if (commit == null) {
+            systemExist("No commit with that id exists.");
+        }
+
+        String blobName = commit.getTrackedBlobs().get(fileName);
+        if (blobName == null) {
+            systemExist("File does not exist in that commit.");
+        }
+
+        File blob = blobService.getBlob(blobName);
+        String content = readContentsAsString(blob);
+        workDirService.addFile(content,fileName);
+    }
+
+    /**
+     * Takes all files in the commit at the head of the given branch, and puts them in the working directory
+     * overwriting the versions of the files that are already there if they exist
+     * the given branch will now be considered the current branch (HEAD)
+     * The staging area is cleared
+     * If a working file is untracked in the current branch and would be overwritten by the checkout print "There is an untracked file in the way; delete it, or add and commit it first."
+     * @param branchName
+     */
+    public void checkoutBranch(String branchName) {
+        checkGitletDir();
+        if (getCurrentBranch().getBranchName().equals(branchName)) {
+            systemExist("No need to checkout the current branch.");
+        }
+        Branch branch = branchService.getBranch(branchName);
+        if (branch == null) {
+            systemExist("No such branch exists.");
+        }
+
+        Commit commit = commitService.getCommitBySha1(branch.getCommitId());
+        checkoutCommit(commit);
+
+        head.setHead(branch);
+    }
+
+    /**
      * branch [branch name]
      * Creates a new branch with the given name
      * Points it at the current head commit
@@ -283,5 +345,30 @@ public class Repository {
             else cur = null;
         }
         return res;
+    }
+    private void checkoutCommit(Commit commit) {
+        // check if their untracked file in working dir
+        Commit currentCommit = getCurrentCommit();
+        List<File> workDirFiles = workDirService.getAllFiles();
+
+        // check if this file exist in the current commit or not
+        // if exist check is tracked or untracked
+        // if untracked and the file exist in the target branch print error message and exit
+        if (workDirFiles.stream()
+                .map(File::getName)
+                .filter(fileName ->
+                        !currentCommit.getTrackedBlobs().containsKey(fileName) ||
+                        !currentCommit.getTrackedBlobs().get(fileName)
+                                .equals(workDirService.getHashedFile(fileName))
+                ) // get files not untracked in the current commit
+                .anyMatch(fileName -> commit.getTrackedBlobs().containsKey(fileName)) // and this file is exist the target branch, and would be overwritten
+        ) {
+            systemExist("There is an untracked file in the way; delete it, or add and commit it first.");
+        }
+
+        workDirService.clear();
+        stageAreaService.clear();
+        commit.getTrackedBlobs().keySet()
+                .forEach(fileName -> checkout(commit.getCommitId(),fileName));
     }
 }
