@@ -1,11 +1,8 @@
 package gitlet;
 
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.List;
 
@@ -59,7 +56,7 @@ public class Repository {
     public void init() throws IOException {
         // Check if the .gitlet dir exist or not
         if (GITLET_DIR.exists()) {
-            systemExist("A Gitlet version-control system already exists in the current directory.");
+            systemExit("A Gitlet version-control system already exists in the current directory.");
         }
 
         // create .gitlet dir
@@ -125,7 +122,7 @@ public class Repository {
         File file = stageAreaService.getFileFromAddition(fileName);
         Commit curCommit = getCurrentCommit();
         String curCommitFile = curCommit.getTrackedBlobs().getOrDefault(fileName,null);
-        if (file == null && curCommitFile == null) systemExist("No reason to remove the file.");
+        if (file == null && curCommitFile == null) systemExit("No reason to remove the file.");
 
         if (file != null) {
             stageAreaService.deleteFromAddition(file);
@@ -153,7 +150,7 @@ public class Repository {
         List<String> removalFiles = stageAreaService.getRemovalFilesNames();
 
         if (additionFiles.isEmpty() && removalFiles.isEmpty()) {
-            systemExist("No changes added to the commit.");
+            systemExit("No changes added to the commit.");
         }
 
         Commit currentCommit = getCurrentCommit();
@@ -213,7 +210,7 @@ public class Repository {
         checkGitletDir();
         List<Commit> commits = commitService.getAllCommitsByMessage(commitMessage);
         if (commits.isEmpty()) {
-            systemExist("Found no commit with that message.");
+            systemExit("Found no commit with that message.");
         }
         commits.forEach(commit -> System.out.println(commit.getCommitId()));
     }
@@ -243,12 +240,12 @@ public class Repository {
         checkGitletDir();
         Commit commit = commitService.getCommitBySha1(commitHash);
         if (commit == null) {
-            systemExist("No commit with that id exists.");
+            systemExit("No commit with that id exists.");
         }
 
         String blobName = commit.getTrackedBlobs().get(fileName);
         if (blobName == null) {
-            systemExist("File does not exist in that commit.");
+            systemExit("File does not exist in that commit.");
         }
 
         File blob = blobService.getBlob(blobName);
@@ -267,11 +264,11 @@ public class Repository {
     public void checkoutBranch(String branchName) {
         checkGitletDir();
         if (getCurrentBranch().getBranchName().equals(branchName)) {
-            systemExist("No need to checkout the current branch.");
+            systemExit("No need to checkout the current branch.");
         }
         Branch branch = branchService.getBranch(branchName);
         if (branch == null) {
-            systemExist("No such branch exists.");
+            systemExit("No such branch exists.");
         }
 
         Commit commit = commitService.getCommitBySha1(branch.getCommitId());
@@ -292,7 +289,7 @@ public class Repository {
     public void branch(String branchName) {
         checkGitletDir();
         if (branchService.isExist(branchName)) {
-            systemExist("A branch with that name already exists.");
+            systemExit("A branch with that name already exists.");
         }
         Branch branch = new Branch(branchName, getCurrentCommit().getCommitId());
         branchService.saveBranch(branch);
@@ -317,7 +314,7 @@ public class Repository {
 
     private void checkGitletDir() {
         if (!GITLET_DIR.exists()) {
-            systemExist("Not in an initialized Gitlet directory.");
+            systemExit("Not in an initialized Gitlet directory.");
         }
     }
 
@@ -330,7 +327,7 @@ public class Repository {
 
     private void checkFileExist(String fileName) {
         if (!workDirService.fileExist(fileName)) {
-            systemExist("File does not exist.");
+            systemExit("File does not exist.");
         }
     }
 
@@ -363,7 +360,7 @@ public class Repository {
                 ) // get files not untracked in the current commit
                 .anyMatch(fileName -> commit.getTrackedBlobs().containsKey(fileName)) // and this file is exist the target branch, and would be overwritten
         ) {
-            systemExist("There is an untracked file in the way; delete it, or add and commit it first.");
+            systemExit("There is an untracked file in the way; delete it, or add and commit it first.");
         }
 
         workDirService.clear();

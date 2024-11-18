@@ -1,7 +1,7 @@
 package gitlet;
 
 import static gitlet.Utils.checkNumArgs;
-import static gitlet.Utils.systemExist;
+import static gitlet.Utils.systemExit;
 
 /** Driver class for Gitlet, a subset of the Git version-control system.
  *  @author Ahmed Mabrouk
@@ -15,7 +15,7 @@ public class Main {
 
 
         if (args.length == 0) {
-            systemExist("Please enter a command.");
+            systemExit("Please enter a command.");
         }
 
         Repository repo = new Repository();
@@ -57,18 +57,18 @@ public class Main {
                             break;
                         case 3:
                             if (!args[1].equals("--"))
-                                systemExist("Incorrect operands.");
+                                systemExit("Incorrect operands.");
                             checkNumArgs(args,2);
                             repo.checkout(args[2]);
                             break;
                         case 4:
                             if (!args[2].equals("--"))
-                                systemExist("Incorrect operands.");
+                                systemExit("Incorrect operands.");
                             checkNumArgs(args,3);
                             repo.checkout(args[1],args[3]);
                             break;
                         default:
-                            systemExist("Incorrect operands.");
+                            systemExit("Incorrect operands.");
                             break;
                     }
                     break;
@@ -81,11 +81,11 @@ public class Main {
                     repo.status();
                     break;
                 default:
-                    systemExist("No command with that name exists.");
+                    systemExit("No command with that name exists.");
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            systemExist(ex.getMessage());
+            systemExit(ex.getMessage());
         }
     }
 }
