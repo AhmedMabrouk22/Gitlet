@@ -120,7 +120,7 @@ public class Repository {
      */
     public void rm(String fileName) {
         checkGitletDir();
-        checkFileExist(fileName);
+//        checkFileExist(fileName);
         File file = stageAreaService.getFileFromAddition(fileName);
         Commit curCommit = getCurrentCommit();
         String curCommitFile = curCommit.getTrackedBlobs().getOrDefault(fileName,null);
@@ -156,6 +156,8 @@ public class Repository {
         if (message.isEmpty()) {
             systemExit("Please enter a commit message.");
         }
+        List<String> additionFiles = stageAreaService.getAdditionFilesNames();
+        List<String> removalFiles = stageAreaService.getRemovalFilesNames();
 
         if (stageAreaService.isEmpty()) {
             systemExit("No changes added to the commit.");
