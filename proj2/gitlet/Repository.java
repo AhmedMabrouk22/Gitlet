@@ -132,8 +132,8 @@ public class Repository {
 
         if (curCommitFile != null) {
             // add it in removal and remove it form working dir
-            file = workDirService.getFile(fileName);
-            stageAreaService.addInRemoval(file);
+            File blob = blobService.getBlob(curCommitFile);
+            stageAreaService.addInRemoval(readContentsAsString(blob),fileName);
             workDirService.deleteFile(fileName);
         }
     }
