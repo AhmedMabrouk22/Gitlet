@@ -353,6 +353,58 @@ public class Repository {
         branchService.saveBranch(branch);
     }
 
+    /**
+     * merge [branch name]
+     * Merges files from the given branch into the current branch
+     * If the split point is the same commit as the given branch print "Given branch is an ancestor of the current branch."
+     * If the split point is the current branch, then the effect is to check out the given branch and print "Current branch fast-forwarded."
+     * Otherwise:
+     *      Case: - Any files that have been modified in the given branch since the split point, but not modified in the current branch
+     *              checked out from the commit at the front of the given branch
+     * @param branchName
+     */
+    public void merge(String branchName) {
+        checkGitletDir();
+        Commit currentCommit = getCurrentCommit();
+        Branch branch = branchService.getBranch(branchName);
+        mergeFailureCases(currentCommit,branch);
+    }
+
+    /**
+     * If there are staged additions or removals present print "You have uncommitted changes."
+     * If a branch with the given name does not exist print "A branch with that name does not exist."
+     * If attempting to merge a branch with itself print "Cannot merge a branch with itself."
+     * If an untracked file in the current commit would be overwritten or deleted by the merge
+     *      print "There is an untracked file in the way; delete it, or add and commit it first."
+     * @param commit
+     * @param branch
+     */
+    private void mergeFailureCases(Commit commit,Branch branch) {
+        if (!stageAreaService.isEmpty()) {
+            systemExit("You have uncommitted changes.");
+        }
+
+        if (branch == null) {
+            systemExit("A branch with that name does not exist.");
+        }
+
+        if (getCurrentBranch().getBranchName().equals(branch.getBranchName())) {
+            systemExit("Cannot merge a branch with itself.");
+        }
+
+        List<File> workDirFiles = workDirService.getAllFiles();
+        if (workDirFiles.stream()
+                .map(File::getName)
+                .anyMatch(fileName ->
+                        !commit.getTrackedBlobs().containsKey(fileName) ||
+                                !commit.getTrackedBlobs().get(fileName)
+                                        .equals(workDirService.getHashedFile(fileName))
+                )
+        ) {
+            systemExit("There is an untracked file in the way; delete it, or add and commit it first.");
+        }
+    }
+
     private void checkGitletDir() {
         if (!GITLET_DIR.exists()) {
             systemExit("Not in an initialized Gitlet directory.");

@@ -88,6 +88,10 @@ public class Main {
                     checkNumArgs(args,1);
                     repo.reset(args[1]);
                     break;
+                case "merge":
+                    checkNumArgs(args,1);
+                    repo.merge(args[1]);
+                    break;
                 default:
                     systemExit("No command with that name exists.");
             }

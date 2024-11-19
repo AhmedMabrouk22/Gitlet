@@ -81,4 +81,8 @@ public class StageAreaService {
         return logBuilder.toString();
     }
 
+    public boolean isEmpty() {
+        return getAdditionFilesNames().isEmpty() && getRemovalFilesNames().isEmpty();
+    }
+
 }
