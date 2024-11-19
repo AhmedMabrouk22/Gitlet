@@ -15,6 +15,7 @@ public class Commit implements Serializable {
     /** commit hash */
     private String commitId;
     private String parent;
+    private String secondParent;
     private Date timestamp;
     private String message;
     private Map<String,String> trackedBlobs;
@@ -74,6 +75,14 @@ public class Commit implements Serializable {
 
     public void setTrackedBlobs(Map<String, String> trackedBlobs) {
         this.trackedBlobs = trackedBlobs;
+    }
+
+    public String getSecondParent() {
+        return secondParent;
+    }
+
+    public void setSecondParent(String secondParent) {
+        this.secondParent = secondParent;
     }
 
     public String log() {

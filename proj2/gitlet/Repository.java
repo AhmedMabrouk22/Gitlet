@@ -188,6 +188,8 @@ public class Repository {
                 .stream()
                 .map(Commit::log)
                 .forEach(System.out::print);
+
+        // TODO: handel second parent case
     }
 
     /**
