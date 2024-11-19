@@ -88,10 +88,17 @@ public class Commit implements Serializable {
     }
 
     public String log() {
-        return "===\n" +
-                String.format("commit %s\n", this.getCommitId()) +
-                new Formatter()
-                        .format("Date: %1$ta %1$tb %1td %1$tT %1$tY %1$tz\n", this.getTimestamp()) +
-                String.format("%s\n\n", this.getMessage());
+        StringBuilder logBuilder = new StringBuilder();
+        logBuilder.append("===\n");
+        logBuilder.append(String.format("commit %s\n", this.getCommitId()));
+        if (getParent() != null && getSecondParent() != null) {
+            logBuilder.append(
+                    String.format("Merge: %s %s\n",  getParent().substring(0, 7),  getSecondParent().substring(0, 7))
+            );
+        }
+        logBuilder.append(new Formatter()
+                .format("Date: %1$ta %1$tb %1td %1$tT %1$tY %1$tz\n", this.getTimestamp()));
+        logBuilder.append(String.format("%s\n\n", this.getMessage()));
+        return logBuilder.toString();
     }
 }

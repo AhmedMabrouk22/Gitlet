@@ -72,7 +72,7 @@ public class Repository {
         HEAD.createNewFile();
 
         // create first commit
-        Commit initCommit = new Commit("initial commit",new Date(0),"","",null);
+        Commit initCommit = new Commit("initial commit",new Date(0),null,null,null);
         commitService.saveCommit(initCommit);
 
         // create master branch
@@ -195,7 +195,6 @@ public class Repository {
                 .map(Commit::log)
                 .forEach(System.out::print);
 
-        // TODO: handel second parent case
     }
 
     /**
