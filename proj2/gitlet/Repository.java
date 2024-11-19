@@ -547,7 +547,7 @@ public class Repository {
         while (cur != null) {
             res.add(cur);
             String parentSha1 = cur.getParent();
-            if (!parentSha1.isEmpty())
+            if (parentSha1 != null)
                 cur = commitService.getCommitBySha1(parentSha1);
             else cur = null;
         }
