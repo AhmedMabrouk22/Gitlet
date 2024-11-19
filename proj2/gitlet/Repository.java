@@ -152,10 +152,12 @@ public class Repository {
     }
 
     private void commit(String message, String secondParent) {
-        List<String> additionFiles = stageAreaService.getAdditionFilesNames();
-        List<String> removalFiles = stageAreaService.getRemovalFilesNames();
 
-        if (additionFiles.isEmpty() && removalFiles.isEmpty()) {
+        if (message.isEmpty()) {
+            systemExit("Please enter a commit message.");
+        }
+
+        if (stageAreaService.isEmpty()) {
             systemExit("No changes added to the commit.");
         }
 
