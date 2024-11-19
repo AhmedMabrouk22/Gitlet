@@ -19,10 +19,11 @@ public class Commit implements Serializable {
     private Date timestamp;
     private String message;
     private Map<String,String> trackedBlobs;
-    public Commit(String message, Date timestamp, String parent, Map<String,String> trackedBlobs) {
+    public Commit(String message, Date timestamp, String parent, String secondParent, Map<String,String> trackedBlobs) {
         this.message = message;
         this.timestamp = timestamp != null ? timestamp : new Date();
         this.parent = parent;
+        this.secondParent = secondParent;
         this.trackedBlobs = trackedBlobs != null ? trackedBlobs :new HashMap<>();
         this.commitId = generateHash();
     }
@@ -31,7 +32,8 @@ public class Commit implements Serializable {
         List<Object> items = new ArrayList<>();
         items.add(message);
         items.add(timestamp.toString());
-        items.add(parent);
+        items.add((parent == null ? "" : parent));
+        items.add((secondParent == null ? "" : secondParent));
         for (Map.Entry<String,String> blob : trackedBlobs.entrySet())
             items.add(blob.toString());
         return sha1(items);

@@ -25,6 +25,7 @@ public class CommitService {
     }
 
     public Commit getCommitBySha1(String commitSha1) {
+        if (commitSha1 == null || commitSha1.isEmpty()) return null;
         File commitFile = join(COMMIT_DIR,commitSha1);
         if (!commitFile.exists()) return null;
         return readObject(commitFile,Commit.class);

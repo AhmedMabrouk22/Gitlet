@@ -26,6 +26,11 @@ public class StageAreaService {
         writeContents(join(ADD_DIR,file.getName()),readContentsAsString(file));
     }
 
+    public void addInAddition(String content,String fileName) {
+        File file = join(ADD_DIR,fileName);
+        writeContents(file,content);
+    }
+
     public File getFileFromAddition(String fileName) {
         File file = join(ADD_DIR,fileName);
         return file.exists() ? file : null;
@@ -49,6 +54,11 @@ public class StageAreaService {
 
     public void addInRemoval(File file){
         writeContents(join(REMOVE_DIR,file.getName()), readContentsAsString(file));
+    }
+
+    public void addInRemoval(String content,String fileName) {
+        File file = join(REMOVE_DIR,fileName);
+        writeContents(file,content);
     }
 
     public void deleteFromRemoval(String fileName) {

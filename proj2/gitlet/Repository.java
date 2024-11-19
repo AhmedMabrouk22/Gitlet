@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import static gitlet.Utils.*;
 
@@ -70,7 +72,7 @@ public class Repository {
         HEAD.createNewFile();
 
         // create first commit
-        Commit initCommit = new Commit("initial commit",new Date(0),"",null);
+        Commit initCommit = new Commit("initial commit",new Date(0),"","",null);
         commitService.saveCommit(initCommit);
 
         // create master branch
@@ -146,6 +148,10 @@ public class Repository {
      */
     public void commit(String message) {
         checkGitletDir();
+        commit(message,null);
+    }
+
+    private void commit(String message, String secondParent) {
         List<String> additionFiles = stageAreaService.getAdditionFilesNames();
         List<String> removalFiles = stageAreaService.getRemovalFilesNames();
 
@@ -169,7 +175,7 @@ public class Repository {
         stageAreaService.clear();
 
         // create new commit
-        Commit newCommit = new Commit(message, Date.from(Instant.now()), currentCommit.getCommitId(),blobs);
+        Commit newCommit = new Commit(message, Date.from(Instant.now()), currentCommit.getCommitId(),secondParent,blobs);
         commitService.saveCommit(newCommit);
 
         // change current commit
@@ -360,9 +366,6 @@ public class Repository {
      * Merges files from the given branch into the current branch
      * If the split point is the same commit as the given branch print "Given branch is an ancestor of the current branch."
      * If the split point is the current branch, then the effect is to check out the given branch and print "Current branch fast-forwarded."
-     * Otherwise:
-     *      Case: - Any files that have been modified in the given branch since the split point, but not modified in the current branch
-     *              checked out from the commit at the front of the given branch
      * @param branchName
      */
     public void merge(String branchName) {
@@ -370,6 +373,79 @@ public class Repository {
         Commit currentCommit = getCurrentCommit();
         Branch branch = branchService.getBranch(branchName);
         mergeFailureCases(currentCommit,branch);
+
+        // get split point
+        Commit splitPoint = getSplitPoint(branch,currentCommit);
+
+        if (splitPoint.getCommitId().equals(branch.getCommitId())) {
+            systemExit("Given branch is an ancestor of the current branch.");
+        }
+
+        if (splitPoint.getCommitId().equals(currentCommit.getCommitId())) {
+            checkoutBranch(branchName);
+            systemExit("Current branch fast-forwarded.");
+        }
+
+        Commit givenCommit = commitService.getCommitBySha1(branch.getCommitId());
+
+        Set<String> files = new HashSet<>();
+        files.addAll(currentCommit.getTrackedBlobs().keySet());
+        files.addAll(splitPoint.getTrackedBlobs().keySet());
+        files.addAll(givenCommit.getTrackedBlobs().keySet());
+
+        AtomicBoolean isConflict = new AtomicBoolean(false);
+        files.forEach(fileName -> {
+            String splitFile = splitPoint.getTrackedBlobs().get(fileName);
+            String commitFile = currentCommit.getTrackedBlobs().get(fileName);
+            String branchFile = givenCommit.getTrackedBlobs().get(fileName);
+
+            // if the given branch updated and current = split point
+            if (splitFile != null && branchFile != null
+                    && splitFile.equals(commitFile) && !splitFile.equals(branchFile)) {
+                String content = readContentsAsString(blobService.getBlob(branchFile));
+                workDirService.addFile(content,fileName);
+                stageAreaService.addInAddition(content,fileName);
+            }
+
+
+            //Any files that were not present at the split point and are present only in the given branch should be checked out and staged
+            if (splitFile == null && commitFile == null && branchFile != null) {
+                String content = readContentsAsString(blobService.getBlob(branchFile));
+                workDirService.addFile(content,fileName);
+                stageAreaService.addInAddition(content,fileName);
+            }
+
+            // Any files present at the split point, unmodified in the current branch, and absent in the given branch should be removed (and untracked).
+            if (splitFile != null && splitFile.equals(commitFile) && branchFile == null) {
+                String content = readContentsAsString(blobService.getBlob(commitFile));
+                stageAreaService.addInRemoval(content,fileName);
+                workDirService.deleteFile(fileName);
+            }
+
+            if (!Objects.equals(commitFile,splitFile)
+                    && !Objects.equals(branchFile,splitFile)
+                    && !Objects.equals(commitFile,branchFile)) {
+                String currentContent = commitFile != null ? readContentsAsString(blobService.getBlob(commitFile)) : "";
+                String branchContent = branchFile != null ? readContentsAsString(blobService.getBlob(branchFile)) : "";
+                String content = "<<<<<<< HEAD\n" +
+                        currentContent +
+                        "=======\n" +
+                        branchContent +
+                        ">>>>>>>\n";
+                workDirService.addFile(content,fileName);
+                stageAreaService.addInAddition(content,fileName);
+                isConflict.set(true);
+            }
+
+
+        });
+
+        String commitMessage = "Merged " + branchName + " into " + getCurrentBranch().getBranchName();
+        commit(commitMessage,givenCommit.getCommitId());
+
+        if (isConflict.get()) {
+            System.out.println("Encountered a merge conflict.");
+        }
     }
 
     /**
@@ -404,6 +480,46 @@ public class Repository {
                 )
         ) {
             systemExit("There is an untracked file in the way; delete it, or add and commit it first.");
+        }
+    }
+
+    private Commit getSplitPoint(Branch branch, Commit currentCommit) {
+        Commit branchCommit = commitService.getCommitBySha1(branch.getCommitId());
+
+        // get commit tree for current commit
+        // get commit tree for branch commit
+        // return latest common ancestor
+        Set<String> currentCommitTree = getCommitTree(currentCommit).stream()
+                .map(Commit::getCommitId).collect(Collectors.toSet());
+
+        List<Commit> branchCommitTree = getCommitTree(branchCommit);
+
+        return branchCommitTree.stream()
+                .filter(commit -> currentCommitTree.contains(commit.getCommitId()))
+                .max(Comparator.comparing(Commit::getTimestamp))
+                .orElse(null);
+    }
+
+    private List<Commit> getCommitTree(Commit commit) {
+        List<Commit> res = new ArrayList<>();
+        // dfs over commit, commit might be merge commit and have the second parent
+        // in merge commit the commits form will be a full directed acyclic graph
+        dfs(commit,res, new HashSet<>());
+        return res;
+    }
+
+    private void dfs(Commit commit, List<Commit> res, Set<Commit> visited) {
+        Commit firstParent = commitService.getCommitBySha1(commit.getParent());
+        Commit secondParent = commitService.getCommitBySha1(commit.getSecondParent());
+
+        res.add(commit);
+        visited.add(commit);
+        while (firstParent != null && !visited.contains(firstParent)) {
+            dfs(firstParent,res,visited);
+        }
+
+        while (secondParent != null && !visited.contains(secondParent)) {
+            dfs(secondParent,res,visited);
         }
     }
 
