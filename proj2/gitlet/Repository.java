@@ -189,6 +189,7 @@ public class Repository {
     }
 
     /**
+     * log
      * Display information about each commit backwards
      * it start from current head commit
      */
@@ -202,6 +203,7 @@ public class Repository {
     }
 
     /**
+     * global-log
      *  Like log, except displays information about all commits ever made.
      *  The order of the commits does not matter
      */
@@ -214,6 +216,7 @@ public class Repository {
     }
 
     /**
+     * find [commit message]
      * Print ids of all commits that have the commit message
      * @param commitMessage
      */
@@ -265,6 +268,7 @@ public class Repository {
     }
 
     /**
+     * checkout [branch name]
      * Takes all files in the commit at the head of the given branch, and puts them in the working directory
      * overwriting the versions of the files that are already there if they exist
      * the given branch will now be considered the current branch (HEAD)
@@ -327,6 +331,7 @@ public class Repository {
     }
 
     /**
+     * status
      * Displays what branches currently exist and marks the current branch with a *
      * displays what files have been staged for addition or removal
      * Entries listed in lexicographic order
@@ -344,6 +349,7 @@ public class Repository {
     }
 
     /**
+     * reset [commit id]
      *  Checks out all the files tracked by the given commit
      *  Removes tracked files that are not present in that commit
      *  Moves the current branch’s head to that commit node
