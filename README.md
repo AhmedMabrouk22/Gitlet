@@ -1,7 +1,7 @@
 # Gitlet
 
 ### Overview 
-A distributed version control system that mimics some of the basic features of the Git
+Gitlet is a distributed version control system that mimics some of the basic features of the Git
 
 ### Main Features
 The main functionality that Gitlet supports is:
@@ -13,12 +13,12 @@ The main functionality that Gitlet supports is:
 - Merging changes made in one branch into another.
 
 
-### Project Strucutre
+### Project Structure
 
 ![gitlet](https://github.com/user-attachments/assets/96ef11d9-7a53-4504-88e0-3845b86066cb)
 
 - **Stage area**: 
-  - contain the working directory tracked file.
+  - contain the working directory tracked files.
   - files stages in addition will be added tracked in next commit.
   - files staged in removal will be removed in the next commit or unstage if it currently staged for addition 
 - **Commit**: 
@@ -97,7 +97,7 @@ it's a simplified implementation of Git supported commands such as:
   - marks the current branch with a `*`
 - `checkout -- [file name]`
   - Takes the version of the file as it exists in the head commit and puts it in the working directory.
-- `chackout [commid id] -- [file name]`
+- `checkout [commid id] -- [file name]`
   - Takes the version of the file as it exists in the commit with the given id, and puts it in the working directory.
 - `checkout [branch name]`
   - Takes all files in the commit at the head of the given branch, and puts them in the working directory.
@@ -114,7 +114,7 @@ it's a simplified implementation of Git supported commands such as:
 
 ### Coming Features and Commands
 
-1. [ ] Enhanced status command and add Modifications Not Staged For Commit, Untracked Files
+1. [ ] Enhanced status command and add modifications not staged for commit, untracked files
 2. [ ] Add Basic Remote Repository Commands:
    - `add-remote`
    - `rm-remote`
