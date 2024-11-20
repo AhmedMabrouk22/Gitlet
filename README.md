@@ -96,7 +96,7 @@ it's a simplified implementation of Git supported commands such as:
   - marks the current branch with a `*`
 - `checkout -- [file name]`
   - Takes the version of the file as it exists in the head commit and puts it in the working directory.
-- `checkout [commid id] -- [file name]`
+- `checkout [commit id] -- [file name]`
   - Takes the version of the file as it exists in the commit with the given id, and puts it in the working directory.
 - `checkout [branch name]`
   - Takes all files in the commit at the head of the given branch, and puts them in the working directory.
